@@ -17,22 +17,28 @@ public class UserTests {
         ValidatableResponse creationsResponse = client.create(user);
         accessToken = check.createdSuccessfully(creationsResponse);
     }
+
     @Test
- //   @Description("Successful login")
     @DisplayName("Login user")
     public void loginUser() {
-        var user = generator.generick();
+        var user = generator.random();
+        ValidatableResponse creationsResponse = client.create(user);
+        accessToken = check.createdSuccessfully(creationsResponse);
         Credentials creds = Credentials.from(user);
         ValidatableResponse loginResponse = client.login(creds);
         check.loggedInSuccessfully(loginResponse);
     }
+
     @Test
     @DisplayName("Creation fails with data existing user")
     public void creationFailsWithDataExistingUser() {
-        var user = generator.nonExiting();
+        var user = generator.random();
         ValidatableResponse creationsResponse = client.create(user);
-        check.creationFailed(creationsResponse);
+        accessToken = check.createdSuccessfully(creationsResponse);
+        ValidatableResponse creationsResponseTwice = client.create(user);
+        check.creationFailed(creationsResponseTwice);
     }
+
     @Test
     @DisplayName("Login fails without password")
     public void loginFailsWithoutPassword() {
@@ -43,6 +49,7 @@ public class UserTests {
         ValidatableResponse loginResponse = client.login(creds);
         check.loginFailed(loginResponse);
     }
+
     @Test
     @DisplayName("Login fails with wrong email and password")
     public void loginFailsWithWrongEmailAndPassword() {
@@ -54,12 +61,14 @@ public class UserTests {
         ValidatableResponse loginResponse = client.login(creds);
         check.loginFailed(loginResponse);
     }
+
     @After
     @DisplayName("Remove test users")
     public void deleteUser() {
         if (accessToken != null) {
             ValidatableResponse response = client.delete(accessToken);
             check.deletedSuccessfully(response);
+            accessToken = null;
         }
     }
 }
